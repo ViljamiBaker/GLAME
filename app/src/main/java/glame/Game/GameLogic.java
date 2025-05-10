@@ -1,4 +1,4 @@
-package glame.Game;
+package glame.game;
 
 public class GameLogic {
 

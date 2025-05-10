@@ -41,6 +41,8 @@ dependencies {
 	runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
 }
 
+
+
 // Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
@@ -50,10 +52,11 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = 'glame.App'
+    mainClass = 'jlwgl.App'
 }
 
 tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
 }
+

@@ -1,4 +1,4 @@
-package glame.Renderer.util;
+package glame.renderer.util;
 
 import org.lwjgl.BufferUtils;
 
@@ -34,7 +34,7 @@ public class Texture {
         IntBuffer width = BufferUtils.createIntBuffer(1);
         IntBuffer height = BufferUtils.createIntBuffer(1);
         IntBuffer channels = BufferUtils.createIntBuffer(1);
-        ByteBuffer image = stbi_load(System.getProperty("user.dir") + "\\app\\src\\main\\java\\jlwgl\\textures\\" + filepath, width, height, channels, 0);
+        ByteBuffer image = stbi_load(System.getProperty("user.dir") + "\\app\\src\\main\\java\\glame\\renderer\\textures\\" + filepath, width, height, channels, 0);
 
         if (image != null) {
             if (channels.get(0) == 3) {

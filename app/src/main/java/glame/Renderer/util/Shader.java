@@ -1,6 +1,6 @@
-package glame.Renderer.util;
+package glame.renderer.util;
 
-import static jlwgl.util.LUTILVB.*;
+import static glame.renderer.util.LUTILVB.*;
 import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL20.glUniform1f;
 import static org.lwjgl.opengl.GL20.glUniform1i;

@@ -1,4 +1,4 @@
-package glame.Renderer.util;
+package glame.renderer.util;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.GL_FALSE;
@@ -139,8 +139,8 @@ public class LUTILVB {
     }
 
     public static int loadShader(String vertPath, String fragPath){
-        String vert = loadAsString(System.getProperty("user.dir") + "\\app\\src\\main\\java\\jlwgl\\shaderPrograms\\" + vertPath + ".vert");
-        String frag = loadAsString(System.getProperty("user.dir") + "\\app\\src\\main\\java\\jlwgl\\shaderPrograms\\" + fragPath + ".frag");
+        String vert = loadAsString(System.getProperty("user.dir") + "\\app\\src\\main\\java\\glame\\renderer\\shaderPrograms\\" + vertPath + ".vert");
+        String frag = loadAsString(System.getProperty("user.dir") + "\\app\\src\\main\\java\\glame\\renderer\\shaderPrograms\\" + fragPath + ".frag");
 
         return create(vert,frag);
     }
@@ -173,6 +173,12 @@ public class LUTILVB {
 
         glLinkProgram(program);
         glValidateProgram(program);
+
+        if(glGetProgrami(program,GL_VALIDATE_STATUS) == GL_FALSE){
+            System.out.println("program link fail :(");
+            System.out.println(glGetProgrami(program, GL_INFO_LOG_LENGTH));
+            System.out.println(glGetProgramInfoLog(program));
+        }
 
         glDeleteShader(vertId);
         glDeleteShader(fragId);
@@ -246,4 +252,48 @@ public class LUTILVB {
             }
         ),0);
     }
+
+    public static float cubeVertices[] = {
+        -0.5f, -0.5f, -0.5f,  0.25f, 0.0f,
+         0.5f, -0.5f, -0.5f,  0.5f, 0.0f,
+         0.5f,  0.5f, -0.5f,  0.5f, 0.333333f,
+         0.5f,  0.5f, -0.5f,  0.5f, 0.333333f,
+        -0.5f,  0.5f, -0.5f,  0.25f, 0.333333f,
+        -0.5f, -0.5f, -0.5f,  0.25f, 0.0f,
+    
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.333333f,
+         0.5f, -0.5f,  0.5f,  0.25f, 0.333333f,
+         0.5f,  0.5f,  0.5f,  0.25f, 0.666666f,
+         0.5f,  0.5f,  0.5f,  0.25f, 0.666666f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.666666f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.333333f,
+    
+        -0.5f,  0.5f,  0.5f,  0.25f, 0.333333f,
+        -0.5f,  0.5f, -0.5f,  0.5f, 0.333333f,
+        -0.5f, -0.5f, -0.5f,  0.5f, 0.666666f,
+        -0.5f, -0.5f, -0.5f,  0.5f, 0.666666f,
+        -0.5f, -0.5f,  0.5f,  0.25f, 0.666666f,
+        -0.5f,  0.5f,  0.5f,  0.25f, 0.333333f,
+    
+         0.5f,  0.5f,  0.5f,  0.5f, 0.333333f,
+         0.5f,  0.5f, -0.5f,  0.75f, 0.333333f,
+         0.5f, -0.5f, -0.5f,  0.75f, 0.666666f,
+         0.5f, -0.5f, -0.5f,  0.75f, 0.666666f,
+         0.5f, -0.5f,  0.5f,  0.5f, 0.666666f,
+         0.5f,  0.5f,  0.5f,  0.5f, 0.333333f,
+    
+        -0.5f, -0.5f, -0.5f,  0.75f, 0.333333f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.333333f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.666666f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.666666f,
+        -0.5f, -0.5f,  0.5f,  0.75f, 0.666666f,
+        -0.5f, -0.5f, -0.5f,  0.75f, 0.333333f,
+    
+        -0.5f,  0.5f, -0.5f,  0.25f, 0.666666f,
+         0.5f,  0.5f, -0.5f,  0.5f, 0.666666f,
+         0.5f,  0.5f,  0.5f,  0.5f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.5f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.25f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.25f, 0.666666f,
+    };
 }

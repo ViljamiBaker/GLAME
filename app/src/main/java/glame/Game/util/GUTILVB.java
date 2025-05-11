@@ -14,4 +14,8 @@ public class GUTILVB {
     public static Quaternionf rotateQuatByEuler(Quaternionf quat, float pitch, float yaw, float roll){
         return quat.add(eulerToQuaternion(pitch, yaw, roll));
     }
+
+    public static Quaternionf rotateQuatByEuler(Quaternionf quat, float pitch, float yaw, float roll, Quaternionf dest){
+        return quat.add(eulerToQuaternion(pitch, yaw, roll), dest);
+    }
 }

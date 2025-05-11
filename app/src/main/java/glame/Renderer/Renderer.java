@@ -37,8 +37,8 @@ import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.lwjgl.assimp.Assimp;
 
+import glame.game.GameLogic;
 import glame.game.util.CFrame;
 import glame.renderer.util.*;
 import glame.renderer.util.Lights.Light;
@@ -51,6 +51,7 @@ public class Renderer {
 	float deltaTime = 0.0f;	// Time between current frame and last frame
 	float lastFrame = 0.0f; // Time of last frame
 	Camera camera;
+	GameLogic gameLogic;
     public Renderer(){
 
         init();
@@ -61,20 +62,10 @@ public class Renderer {
 		enableDebug();
 
 		camera = new Camera(window);
-		float vertices[] = LUTILVB.cubeVertices;
 
-		CFrame[] cubePositions = {
-			new CFrame(new Vector3f( 0.0f,  0.0f,  0.0f), 0,-1,0),
-			new CFrame(new Vector3f( 2.0f,  5.0f, -15.0f), 0,-1,0),
-			new CFrame(new Vector3f(-1.5f, -2.2f, -2.5f), 0,-1,0),
-			new CFrame(new Vector3f(-3.8f, -2.0f, -12.3f), 0,-1,0),
-			new CFrame(new Vector3f( 2.4f, -0.4f, -3.5f ) , 0,-1,0),
-			new CFrame(new Vector3f(-1.7f,  3.0f, -7.5f ) , 0,-1,0),
-			new CFrame(new Vector3f( 1.3f, -2.0f, -2.5f ), 0,-1,0),
-			new CFrame(new Vector3f( 1.5f,  2.0f, -2.5f ), 0,-1,0),
-			new CFrame(new Vector3f( 1.5f,  0.2f, -1.5f ), 0,-1,0),
-			new CFrame(new Vector3f(-1.3f,  1.0f, -1.5f ), 0,-1,0),
-		};
+		gameLogic = new GameLogic(camera, window);
+
+		float vertices[] = LUTILVB.cubeVertices;
 
 		Vector3f pointLightPositions[] = {
 			new Vector3f( 0.7f,  0.2f,  2.0f),
@@ -132,12 +123,12 @@ public class Renderer {
 			deltaTime = currentFrame - lastFrame;
 			lastFrame = currentFrame;  
 
+			gameLogic.update(deltaTime);
+
 			// input
 			processInput(window);
 
-			//render code		
-			//new Vector3f(1,1,3);
-			Vector3f lightPos = new Vector3f();//(float)Math.sin(currentFrame)*3.0f,(float)Math.sin(currentFrame*2),(float)Math.cos(currentFrame)*3.0f);
+			//render code
 
 			glClearColor(0.2f, 0.3f, 0.3f, 0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -187,6 +178,7 @@ public class Renderer {
 			glActiveTexture(GL_TEXTURE1);
 			specularMap.bind();
 
+			CFrame[] cubePositions = gameLogic.getCubes();
 			// world transformation
 			Matrix4f model = new Matrix4f();
 			for (int i = 0; i < cubePositions.length; i++) {

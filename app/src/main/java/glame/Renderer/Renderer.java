@@ -39,6 +39,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.assimp.Assimp;
 
+import glame.game.util.CFrame;
 import glame.renderer.util.*;
 import glame.renderer.util.Lights.Light;
 //https://learnopengl.com/Lighting/Colors
@@ -62,17 +63,17 @@ public class Renderer {
 		camera = new Camera(window);
 		float vertices[] = LUTILVB.cubeVertices;
 
-		Vector3f[] cubePositions = {
-			new Vector3f( 0.0f,  0.0f,  0.0f), 
-			new Vector3f( 2.0f,  5.0f, -15.0f), 
-			new Vector3f(-1.5f, -2.2f, -2.5f),  
-			new Vector3f(-3.8f, -2.0f, -12.3f),  
-			new Vector3f( 2.4f, -0.4f, -3.5f),  
-			new Vector3f(-1.7f,  3.0f, -7.5f),  
-			new Vector3f( 1.3f, -2.0f, -2.5f),  
-			new Vector3f( 1.5f,  2.0f, -2.5f), 
-			new Vector3f( 1.5f,  0.2f, -1.5f), 
-			new Vector3f(-1.3f,  1.0f, -1.5f)  
+		CFrame[] cubePositions = {
+			new CFrame(new Vector3f( 0.0f,  0.0f,  0.0f), 0,-1,0),
+			new CFrame(new Vector3f( 2.0f,  5.0f, -15.0f), 0,-1,0),
+			new CFrame(new Vector3f(-1.5f, -2.2f, -2.5f), 0,-1,0),
+			new CFrame(new Vector3f(-3.8f, -2.0f, -12.3f), 0,-1,0),
+			new CFrame(new Vector3f( 2.4f, -0.4f, -3.5f ) , 0,-1,0),
+			new CFrame(new Vector3f(-1.7f,  3.0f, -7.5f ) , 0,-1,0),
+			new CFrame(new Vector3f( 1.3f, -2.0f, -2.5f ), 0,-1,0),
+			new CFrame(new Vector3f( 1.5f,  2.0f, -2.5f ), 0,-1,0),
+			new CFrame(new Vector3f( 1.5f,  0.2f, -1.5f ), 0,-1,0),
+			new CFrame(new Vector3f(-1.3f,  1.0f, -1.5f ), 0,-1,0),
 		};
 
 		Vector3f pointLightPositions[] = {
@@ -189,11 +190,10 @@ public class Renderer {
 			// world transformation
 			Matrix4f model = new Matrix4f();
 			for (int i = 0; i < cubePositions.length; i++) {
-				float angle = 20.0f * i + (float)glfwGetTime(); 
-				model = new Matrix4f().translate(cubePositions[i]).rotate(angle, new Vector3f(1.0f, 0.3f, 0.5f).normalize()); 
+
+				cubePositions[i].rotation.rotateAxis(0.016f, new Vector3f(1.0f, 0.3f, 0.5f).normalize());
+				model = cubePositions[i].getAsMat4(); 
 				lightingShader.setUniform("model", model);
-				lightingShader.setFloat("mixpercent", (float)Math.sin(angle)/2.0f+0.5f);
-				//shader.setFloat("time", (float)glfwGetTime());
 				glBindVertexArray(cubeVertexArray);
 				glDrawArrays(GL_TRIANGLES, 0, 36);
 			}

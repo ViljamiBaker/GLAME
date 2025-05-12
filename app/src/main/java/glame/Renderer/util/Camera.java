@@ -12,8 +12,8 @@ public class Camera {
 	public Vector3f front = new Vector3f(0.0f, 0.0f, -1.0f);
 	public Vector3f up = new Vector3f(0.0f, 1.0f,  0.0f);
 	float fov = 1.0f;
-	float yaw = 0;
-	float pitch = 0;
+	public float yaw = 0;
+	public float pitch = 0;
 	float lastX = 400, lastY = 300;
 	boolean firstMouse = true;
     long window;
@@ -49,13 +49,7 @@ public class Camera {
 			if(pitch < -1.55f)
 			pitch = -1.55f;
 
-			Vector3f direction = new Vector3f();
-			direction.x = (float)Math.cos(yaw) * (float)Math.cos(pitch);
-			direction.y = (float)Math.sin(pitch);
-			direction.z = (float)Math.sin(yaw) * (float)Math.cos(pitch);
-			front = direction.normalize();
-			float[] rotation = GUTILVB.vector3toAngles(front);
-        	System.out.println(rotation[0]*57.295 + " "+ rotation[1]*57.295 + " " + rotation[2]*57.295);
+			front = GUTILVB.eulerAngToVector3(pitch, yaw);
 		}); 
     }
 

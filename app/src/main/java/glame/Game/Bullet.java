@@ -4,6 +4,7 @@ import org.joml.Vector3f;
 
 import glame.game.util.CFrame;
 import glame.game.util.GUTILVB;
+import glame.renderer.util.Camera;
 
 public class Bullet {
     CFrame cFrame;
@@ -12,11 +13,9 @@ public class Bullet {
 
     double speed;
 
-    public Bullet(Vector3f position,Vector3f forward, double speed){
-        float[] rotation = GUTILVB.vector3toAngles(forward);
-        System.out.println(rotation[0]*57.295 + " "+ rotation[1]*57.295 + " " + rotation[2]*57.295);
-        this.cFrame = new CFrame(position, forward.x, forward.y, forward.z, 0.1f);
-        this.forward = forward;
+    public Bullet(Camera c, double speed){
+        this.cFrame = new CFrame(c.position.add(c.front, new Vector3f()), new Vector3f(0, -c.yaw, c.pitch), 0.2f);
+        this.forward = new Vector3f(GUTILVB.eulerAngToVector3(cFrame.rotation.z, -cFrame.rotation.y));
         this.speed = speed;
     }
 
@@ -25,6 +24,6 @@ public class Bullet {
     }
 
     public CFrame getCFrame(){
-        return cFrame;//new CFrame(cFrame.position, cFrame.rotation, cFrame.scale);
+        return new CFrame(cFrame.position, cFrame.rotation, cFrame.scale);
     }
 }

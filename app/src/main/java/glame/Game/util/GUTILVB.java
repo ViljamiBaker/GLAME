@@ -8,6 +8,7 @@ public class GUTILVB {
     public static Quaternionf eulerToQuaternion(Vector3f in){
         return eulerToQuaternion(in.x, in.y, in.z);
     }
+
     public static Quaternionf eulerToQuaternion(float pitch, float yaw, float roll){
         double cr = Math.cos(roll * 0.5);
         double sr = Math.sin(roll * 0.5);
@@ -23,12 +24,26 @@ public class GUTILVB {
         return new Quaternionf(x, y, z, w);
     }
 
-    public static float[] vector3toAngles(Vector3f in){
-        float r = Math.sqrt(in.x*in.x+in.y*in.y+in.z*in.z);
-        float pitch = Math.atan2(in.y,in.x);
-        float yaw = Math.acos(in.z/r);
+    public static Vector3f rotateXY(Vector3f in){
+        float temp = in.x;
+        in.x = in.z;
+        in.z = temp;
+        return in;
+    }
 
-        return new float[] {pitch,yaw,0};
+    public static Vector3f eulerAngToVector3(float pitch, float yaw){
+        float x = Math.cos(yaw) * Math.cos(pitch);
+		float y = Math.sin(pitch);
+		float z = Math.sin(yaw) * Math.cos(pitch);
+
+        return new Vector3f(x,y,z);
+    }
+
+    public static float[] vector3toAngles(Vector3f in){
+        float pitch = Math.asin(-in.y);
+        float yaw = Math.acos(in.x/Math.cos(pitch));
+
+        return new float[] {0,yaw,pitch};
     }
 
     public static Quaternionf rotateQuatByEuler(Quaternionf quat, float pitch, float yaw, float roll){

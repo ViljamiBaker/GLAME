@@ -20,7 +20,7 @@ public class GameLogic {
 
     long window;
 
-    double timeSinceLastSpawn = 200000;
+    double timeSinceLastSpawn = 10000;
 
     ArrayList<Enemy> enemies = new ArrayList<>();
     ArrayList<Bullet> bullets = new ArrayList<>();
@@ -67,8 +67,8 @@ public class GameLogic {
 
     private void processInput(double dt){
         if(shotCooldown<0.0&&glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1)==GLFW_PRESS){
-            shotCooldown = 0.2;
-            bullets.add(new Bullet(player.position.add(0,0,0, new Vector3f()).add(player.front), player.front.add(0,0,0, new Vector3f()), 1.0));
+            shotCooldown = 0.01;
+            bullets.add(new Bullet(player, 5.0));
         }
     }
 

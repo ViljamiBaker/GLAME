@@ -21,8 +21,8 @@ public class CFrame {
     }
 
     public CFrame(Vector3f position, Vector3f rotation, float scale){
-        this.position = position;
-        this.rotation = rotation;
+        this.position = new Vector3f(position);
+        this.rotation = new Vector3f(rotation);
         this.scale = scale;
     }
 
@@ -33,6 +33,6 @@ public class CFrame {
     }*/
 
     public Matrix4f getAsMat4(){
-        return new Matrix4f().translate(position).rotate(GUTILVB.eulerToQuaternion(rotation)).scale(scale);
+        return new Matrix4f().translate(position).rotateXYZ(rotation).scale(scale);
     }
 }

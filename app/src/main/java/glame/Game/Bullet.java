@@ -1,6 +1,5 @@
 package glame.game;
 
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import glame.game.util.CFrame;
@@ -14,6 +13,8 @@ public class Bullet {
     double speed;
 
     public Bullet(Vector3f position,Vector3f forward, double speed){
+        float[] rotation = GUTILVB.vector3toAngles(forward);
+        System.out.println(rotation[0]*57.295 + " "+ rotation[1]*57.295 + " " + rotation[2]*57.295);
         this.cFrame = new CFrame(position, forward.x, forward.y, forward.z, 0.1f);
         this.forward = forward;
         this.speed = speed;
@@ -24,6 +25,6 @@ public class Bullet {
     }
 
     public CFrame getCFrame(){
-        return new CFrame(cFrame.position, GUTILVB.rotateQuatByEuler(cFrame.rotation, (float)Math.PI, (float)Math.PI, (float)Math.PI, new Quaternionf()), cFrame.scale);
+        return cFrame;//new CFrame(cFrame.position, cFrame.rotation, cFrame.scale);
     }
 }

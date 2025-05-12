@@ -55,17 +55,20 @@ public class GameLogic {
                 enimiesToRem.add(enemy);
             }
         }
-        enemies.removeAll(enimiesToRem);
-        bullets.removeAll(bullesToRem);
         for (Bullet bullet : bullets) {
             bullet.update(dt);
+            if(bullet.cFrame.position.lengthSquared()>500){
+                bullesToRem.add(bullet);
+            }
         }
+        enemies.removeAll(enimiesToRem);
+        bullets.removeAll(bullesToRem);
     }
 
     private void processInput(double dt){
         if(shotCooldown<0.0&&glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1)==GLFW_PRESS){
             shotCooldown = 0.2;
-            bullets.add(new Bullet(player.position.add(0,0,0, new Vector3f()).add(player.front), player.front.add(0,0,0, new Vector3f()), 5.0));
+            bullets.add(new Bullet(player.position.add(0,0,0, new Vector3f()).add(player.front), player.front.add(0,0,0, new Vector3f()), 1.0));
         }
     }
 

@@ -18,6 +18,8 @@ public class Enemy {
     }
 
     public void update(double dt){
-        cFrame.position.add(playerpos.sub(cFrame.position, new Vector3f()).normalize().mul((float)(speed*dt)));
+        Vector3f diff = playerpos.sub(cFrame.position, new Vector3f()).normalize().mul((float)(speed*dt));
+        cFrame.rotation = diff.normalize(new Vector3f());
+        cFrame.position.add(diff);
     }
 }

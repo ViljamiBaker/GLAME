@@ -183,7 +183,7 @@ public class Renderer {
 			Matrix4f model = new Matrix4f();
 			for (int i = 0; i < cubePositions.length; i++) {
 
-				cubePositions[i].rotation.rotateAxis(0.016f, new Vector3f(1.0f, 0.3f, 0.5f).normalize());
+				//cubePositions[i].rotation.rotateAxis(0.016f, new Vector3f(1.0f, 0.3f, 0.5f).normalize());
 				model = cubePositions[i].getAsMat4(); 
 				lightingShader.setUniform("model", model);
 				glBindVertexArray(cubeVertexArray);

@@ -5,6 +5,8 @@ import static org.lwjgl.glfw.GLFW.*;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
+import glame.game.util.GUTILVB;
+
 public class Camera {
 	public Vector3f position = new Vector3f(0.0f, 0.0f,  3.0f);
 	public Vector3f front = new Vector3f(0.0f, 0.0f, -1.0f);
@@ -52,6 +54,8 @@ public class Camera {
 			direction.y = (float)Math.sin(pitch);
 			direction.z = (float)Math.sin(yaw) * (float)Math.cos(pitch);
 			front = direction.normalize();
+			float[] rotation = GUTILVB.vector3toAngles(front);
+        	System.out.println(rotation[0]*57.295 + " "+ rotation[1]*57.295 + " " + rotation[2]*57.295);
 		}); 
     }
 

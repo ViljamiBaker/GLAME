@@ -1,44 +1,38 @@
 package glame.game;
 
-
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_1;
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
-import static org.lwjgl.glfw.GLFW.glfwGetMouseButton;
-
 import java.util.ArrayList;
 import java.util.Random;
 
 import org.joml.Vector3f;
 
 import glame.game.util.CFrame;
-import glame.renderer.util.Camera;
+import glame.renderer.Renderer;
 
 public class GameLogic {
-    Camera player;
+    public static Player player = new Player();
 
-    double shotCooldown = 0.0;
+    static long window;
 
-    long window;
+    static double timeSinceLastSpawn = 10000;
 
-    double timeSinceLastSpawn = 10000;
+    static ArrayList<Enemy> enemies = new ArrayList<>();
+    static ArrayList<Bullet> bullets = new ArrayList<>();
 
-    ArrayList<Enemy> enemies = new ArrayList<>();
-    ArrayList<Bullet> bullets = new ArrayList<>();
+    static Random r = new Random();
 
-    Random r = new Random();
-
-    public GameLogic(Camera player, long window){
-        this.player = player;
-        this.window = window;
+    public static void init(){
+        window = Renderer.window;
+        player = new Player();
     }
 
-    public void update(double dt){
-        shotCooldown -= dt;
+    public static void update(){
+        player.processInput();
+        double dt = Renderer.deltaTime;
         processInput(dt);
         if(timeSinceLastSpawn > 1){
             timeSinceLastSpawn = 0;
             enemies.add(new Enemy(new CFrame(new Vector3f((float)r.nextDouble(-25, 25),(float)r.nextDouble(-25, 25),(float)r.nextDouble(-25, 25)),
-                    0,0,0,1), 10, r.nextFloat(0.5f, 2), player.position));
+                    0,0,0,1), 10, r.nextFloat(0.5f, 2), player.cframe.position));
         }
         timeSinceLastSpawn += dt;
         ArrayList<Bullet> bullesToRem = new ArrayList<>();
@@ -65,14 +59,10 @@ public class GameLogic {
         bullets.removeAll(bullesToRem);
     }
 
-    private void processInput(double dt){
-        if(shotCooldown<0.0&&glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1)==GLFW_PRESS){
-            shotCooldown = 0.01;
-            bullets.add(new Bullet(player, 5.0));
-        }
+    private static void processInput(double dt){
     }
 
-    public CFrame[] getCubes(){
+    public static CFrame[] getCubes(){
         CFrame[] cframes = new CFrame[enemies.size() + bullets.size()];
         int index = 0;
         for (Enemy enemy : enemies) {

@@ -8,6 +8,12 @@ public class CFrame {
     public Vector3f rotation;
     public float scale;
 
+    public CFrame(){
+        position = new Vector3f();
+        rotation = new Vector3f();
+        scale = 1.0f;
+    }
+
     public CFrame(CFrame cloneFrom){
         position = new Vector3f().add(cloneFrom.position);
         rotation = new Vector3f().add(cloneFrom.rotation);

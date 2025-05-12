@@ -31,6 +31,10 @@ public class GUTILVB {
         return in;
     }
 
+    public static Vector3f eulerAngToVector3(Vector3f rotation){
+        return eulerAngToVector3(rotation.z, rotation.y);
+    }
+
     public static Vector3f eulerAngToVector3(float pitch, float yaw){
         float x = Math.cos(yaw) * Math.cos(pitch);
 		float y = Math.sin(pitch);

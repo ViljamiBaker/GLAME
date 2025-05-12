@@ -65,20 +65,7 @@ public class Camera {
         return new Matrix4f().lookAt(position, position.add(front, new Vector3f()), up);
     }
 
-    public void processInput(float deltaTime){
-		float cameraSpeed = 2.5f * deltaTime; // adjust accordingly
-		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
-			position.add(front.mul(cameraSpeed, new Vector3f()));
-		}
-		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
-			position.sub(front.mul(cameraSpeed, new Vector3f()));
-		}
-		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
-			position.sub((front.cross(up, new Vector3f())).normalize().mul(cameraSpeed,new Vector3f()));
-		}
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
-			position.add((front.cross(up, new Vector3f())).normalize().mul(cameraSpeed,new Vector3f()));
-		}
+    public void processInput(){
 		if(glfwGetKey(window, GLFW_KEY_R)==GLFW_PRESS){
 			fov += 0.05f;
 			projectionGood = false;

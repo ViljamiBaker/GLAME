@@ -44,26 +44,27 @@ import glame.renderer.util.*;
 import glame.renderer.util.Lights.Light;
 //https://learnopengl.com/Lighting/Colors
 public class Renderer {
-    boolean wireframe = false;
-	boolean pDownLast = false;
-	boolean lockMouse = true;
-	boolean lDownLast = false;
-	float deltaTime = 0.0f;	// Time between current frame and last frame
-	float lastFrame = 0.0f; // Time of last frame
-	Camera camera;
-	GameLogic gameLogic;
-    public Renderer(){
+    static boolean wireframe = false;
+	static boolean pDownLast = false;
+	static boolean lockMouse = true;
+	static boolean lDownLast = false;
+	public static float deltaTime = 0.0f;	// Time between current frame and last frame
+	static float lastFrame = 0.0f; // Time of last frame
+	public static Camera camera;
+	public static long window;
+    public static void start(){
 
         init();
 
-        long window = createWindow(800, 600, "Colors");
+        window = createWindow(800, 600, "Colors");
 		glEnable(GL_DEPTH_TEST);  
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		enableDebug();
 
-		camera = new Camera(window);
 
-		gameLogic = new GameLogic(camera, window);
+		GameLogic.init();
+
+		camera = GameLogic.player.camera;
 
 		float vertices[] = LUTILVB.cubeVertices;
 
@@ -123,7 +124,7 @@ public class Renderer {
 			deltaTime = currentFrame - lastFrame;
 			lastFrame = currentFrame;  
 
-			gameLogic.update(deltaTime);
+			GameLogic.update();
 
 			// input
 			processInput(window);
@@ -178,7 +179,7 @@ public class Renderer {
 			glActiveTexture(GL_TEXTURE1);
 			specularMap.bind();
 
-			CFrame[] cubePositions = gameLogic.getCubes();
+			CFrame[] cubePositions = GameLogic.getCubes();
 			// world transformation
 			Matrix4f model = new Matrix4f();
 			for (int i = 0; i < cubePositions.length; i++) {
@@ -214,7 +215,7 @@ public class Renderer {
 		glfwTerminate();
     }
 
-    public void processInput(long window)
+    public static void processInput(long window)
 	{
 		if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(window, true);
@@ -239,12 +240,9 @@ public class Renderer {
 		}
 		lDownLast = glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS;
 		pDownLast = glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS;
-		if(lockMouse){
-			camera.processInput(deltaTime);
-		}
 	}
 
     public static void main(String[] args) {
-        new Renderer();
+        Renderer.start();
     }
 }

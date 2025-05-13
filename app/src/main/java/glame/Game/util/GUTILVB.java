@@ -44,8 +44,8 @@ public class GUTILVB {
     }
 
     public static float[] vector3toAngles(Vector3f in){
-        float pitch = Math.asin(-in.y);
-        float yaw = Math.acos(in.x/Math.cos(pitch));
+        float pitch = Math.asin(in.y);
+        float yaw = Math.acos(in.x/Math.cos(pitch)) * Math.signum(-in.z);
 
         return new float[] {0,yaw,pitch};
     }

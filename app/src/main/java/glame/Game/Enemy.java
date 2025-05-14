@@ -20,7 +20,7 @@ public class Enemy {
 
     public void update(double dt){
         Vector3f diff = playerpos.sub(cFrame.position, new Vector3f()).normalize();
-        cFrame.rotation = new Vector3f(GUTILVB.vector3toAngles(diff));
+        cFrame.setRotation(new Vector3f(GUTILVB.vector3toAngles(diff)));
         cFrame.position.add(diff.mul((float)(speed*dt)));
     }
 }

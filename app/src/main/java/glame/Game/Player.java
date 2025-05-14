@@ -47,13 +47,13 @@ public class Player {
 		}
         cframe.position.add(movement);
 
-        cframe.rotation = new Vector3f(0,camera.yaw,camera.pitch);
+        cframe.setRotation(new Vector3f(0,camera.yaw,camera.pitch));
 
         shotCooldown -= Renderer.deltaTime;
         
         if(shotCooldown<0.0&&glfwGetMouseButton(Renderer.window, GLFW_MOUSE_BUTTON_1)==GLFW_PRESS){
             shotCooldown = 0.01;
-            GameLogic.bullets.add(new Bullet(cframe.position, camera.front, cframe.rotation, 5.0));
+            GameLogic.bullets.add(new Bullet(cframe.position, camera.front, cframe.getRotation(), 5.0));
         }
     }
 }

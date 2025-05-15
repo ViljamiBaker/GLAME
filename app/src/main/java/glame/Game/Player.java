@@ -5,6 +5,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_1;
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_2;
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.glfwGetKey;
 import static org.lwjgl.glfw.GLFW.glfwGetMouseButton;
@@ -54,6 +55,9 @@ public class Player {
         if(shotCooldown<0.0&&glfwGetMouseButton(Renderer.window, GLFW_MOUSE_BUTTON_1)==GLFW_PRESS){
             shotCooldown = 0.01;
             GameLogic.bullets.add(new Bullet(cframe.position, camera.front, cframe.getRotation(), 5.0));
+        }
+        if(shotCooldown<0.0&&glfwGetMouseButton(Renderer.window, GLFW_MOUSE_BUTTON_2)==GLFW_PRESS){
+            System.out.println(cframe.getRotation().z);
         }
     }
 }

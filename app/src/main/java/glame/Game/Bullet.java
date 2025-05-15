@@ -17,9 +17,8 @@ public class Bullet {
     public Bullet(Vector3f pos, Vector3f front, Vector3f dir, double speed){
 
         this.cFrame = new CFrame(pos.add(front, new Vector3f()), new Quaternionf(), 0.2f);
-        System.out.println(Math.signum(dir.y));
-        cFrame.rotation.rotateY(dir.y-(float)Math.PI/2.0f).mul(new Quaternionf().rotateZ(dir.z).mul(
-            new Quaternionf().rotateX((float)Math.PI/4.0f).rotateAxis((float)Math.PI/4.0f, new Vector3f(0,1,1).normalize())));
+        cFrame.rotation.rotateY(-dir.y).mul(new Quaternionf().rotateZ(dir.z));//.mul(
+            //new Quaternionf().rotateX((float)Math.PI/4.0f).rotateAxis((float)Math.PI/4.0f, new Vector3f(0,1,1).normalize())));
         this.forward = front;
         this.speed = speed;
     }

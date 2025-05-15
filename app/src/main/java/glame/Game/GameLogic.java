@@ -13,7 +13,7 @@ public class GameLogic {
 
     static long window;
 
-    static double timeSinceLastSpawn = -100000;
+    static double timeSinceLastSpawn = 100000;
 
     static ArrayList<Enemy> enemies = new ArrayList<>();
     static ArrayList<Bullet> bullets = new ArrayList<>();

@@ -54,10 +54,11 @@ public class Player {
         
         if(shotCooldown<0.0&&glfwGetMouseButton(Renderer.window, GLFW_MOUSE_BUTTON_1)==GLFW_PRESS){
             shotCooldown = 0.01;
-            GameLogic.bullets.add(new Bullet(cframe.position, camera.front, cframe.getRotation(), 5.0));
+            GameLogic.bullets.add(new Bullet(cframe.position, camera.front, 5.0));
         }
-        if(shotCooldown<0.0&&glfwGetMouseButton(Renderer.window, GLFW_MOUSE_BUTTON_2)==GLFW_PRESS){
+        if(glfwGetMouseButton(Renderer.window, GLFW_MOUSE_BUTTON_2)==GLFW_PRESS){
             System.out.println(cframe.getRotation().z);
         }
+        camera.processInput();
     }
 }

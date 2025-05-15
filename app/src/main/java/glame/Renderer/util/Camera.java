@@ -58,13 +58,19 @@ public class Camera {
         int[] width = new int[1];
         int[] height = new int[1];
         glfwGetWindowSize(window, width, height);
-        return new Matrix4f().perspective(fov, (float)width[0]/(float)height[0], 0.01f, 100.0f);
+		if(!ortho){
+			return new Matrix4f().perspective(fov, (float)width[0]/(float)height[0], 0.01f, 100.0f);
+		}else{
+			return new Matrix4f().ortho(-1, 1, -1, 1,0.01f, 100.0f);
+		}
     }
 
 	public Matrix4f getVeiw(){
         return new Matrix4f().lookAt(position, position.add(front, new Vector3f()), up);
     }
 
+	boolean hDownLast = false;
+	boolean ortho = false;
     public void processInput(){
 		if(glfwGetKey(window, GLFW_KEY_R)==GLFW_PRESS){
 			fov += 0.05f;
@@ -74,6 +80,12 @@ public class Camera {
 			fov -= 0.05f;
 			projectionGood = false;
 		}
+		if(glfwGetKey(window, GLFW_KEY_H)==GLFW_PRESS&&!hDownLast){
+			ortho = !ortho;
+			projectionGood = false;
+			System.out.println(ortho);
+		}
+		hDownLast = glfwGetKey(window, GLFW_KEY_H)==GLFW_PRESS;
     }
 
 	public boolean projectionGood(){

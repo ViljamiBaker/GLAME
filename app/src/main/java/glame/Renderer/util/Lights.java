@@ -1,5 +1,7 @@
 package glame.renderer.util;
 
+import java.util.ArrayList;
+
 import org.joml.Vector3f;
 
 public class Lights {
@@ -9,6 +11,14 @@ public class Lights {
     static int pointLightIndex = 0;
     static int spotLightIndex = 0;
 
+    static ArrayList<Light> lights = new ArrayList<>();
+
+    public static void setLights(Shader shader){
+        for (Light light : lights) {
+            light.setShaderValues(shader);
+        }
+    }
+
     public static void resetIndices(){
         dirLightIndex = 0;
         pointLightIndex = 0;
@@ -16,8 +26,13 @@ public class Lights {
     }
 
     public static class Light{
+        public Light(){
+            Lights.lights.add(this);
+        }
         public void setShaderValues(Shader shader, int index){}
         public void setShaderValues(Shader shader){}
+        public void setPosition(Vector3f position) {}
+        public void setDirection(Vector3f direction) {}
     }
 
     public static Light createDirLight(Vector3f direction, Vector3f ambient, Vector3f diffuse, Vector3f specular){
@@ -55,6 +70,11 @@ public class Lights {
         }
 
         @Override
+        public void setDirection(Vector3f direction) {
+            this.direction = direction;
+        }
+
+        @Override
         public void setShaderValues(Shader shader){
             setShaderValues(shader, dirLightIndex);
             dirLightIndex++;
@@ -79,6 +99,11 @@ public class Lights {
             this.ambient = ambient;
             this.diffuse = diffuse;
             this.specular = specular;
+        }
+
+        @Override
+        public void setPosition(Vector3f position) {
+            this.position = position;
         }
 
         @Override
@@ -124,6 +149,16 @@ public class Lights {
             this.ambient = ambient;
             this.diffuse = diffuse;
             this.specular = specular;
+        }
+
+        @Override
+        public void setDirection(Vector3f direction) {
+            this.direction = direction;
+        }
+
+        @Override
+        public void setPosition(Vector3f position) {
+            this.position = position;
         }
 
         @Override

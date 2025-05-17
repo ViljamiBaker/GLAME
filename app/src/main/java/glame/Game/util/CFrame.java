@@ -51,18 +51,13 @@ public class CFrame {
         this.rotation = new Quaternionf().rotateXYZ(rotation.x ,rotation.y, rotation.z);
     }
 
-    public void rotate(Vector3f newRotation) {
-        //Use modulus to fix values to below 360 then convert values to radians
-
+    public void rotate(float x, float y, float z) {
         //Create a quaternion with the delta rotation values
         Quaternionf rotationDelta = new Quaternionf();
-        rotationDelta.rotationXYZ(newRotation.x, -newRotation.y, newRotation.z);
-
-        //Calculate the inverse of the delta quaternion
-        Quaternionf conjugate = rotationDelta.conjugate();
+        rotationDelta.rotationXYZ(x, y, z);
 
         //Multiply this transform by the rotation delta quaternion and its inverse
-        rotation.mul(rotationDelta).mul(conjugate);
+        rotation.mul(rotationDelta);
     }
     public Vector3f getRotation(){
         return rotation.getEulerAnglesXYZ(new Vector3f());

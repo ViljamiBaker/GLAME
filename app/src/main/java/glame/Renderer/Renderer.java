@@ -8,20 +8,12 @@ import static org.lwjgl.opengl.GL11.GL_FILL;
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL11.GL_FRONT_AND_BACK;
 import static org.lwjgl.opengl.GL11.GL_LINE;
-import static org.lwjgl.opengl.GL11.GL_NEAREST;
-import static org.lwjgl.opengl.GL11.GL_REPEAT;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_MIN_FILTER;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_S;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_T;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
 import static org.lwjgl.opengl.GL11.glDrawArrays;
 import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glPolygonMode;
-import static org.lwjgl.opengl.GL11.glTexParameteri;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE1;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
@@ -72,7 +64,8 @@ public class Renderer {
 			new Vector3f( 0.7f,  0.2f,  2.0f),
 			new Vector3f( 2.3f, -3.3f, -4.0f),
 			new Vector3f(-4.0f,  2.0f, -12.0f),
-			new Vector3f( 0.0f,  0.0f, -3.0f)
+			new Vector3f( 0.0f,  0.0f, -3.0f),
+			new Vector3f( 0.0f,  0.0f, 0.0f)
 		};  
 
 		Matrix4f projection = new Matrix4f().perspective(1.0f, 300.0f / 300.0f, 0.1f, 100.0f);
@@ -97,27 +90,38 @@ public class Renderer {
 
 		glBindVertexArray(lightCubeVertexArray);
 
+		glVertexAttribPointer(0, 3, GL_FLOAT, false, Float.BYTES*8, 0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 3, GL_FLOAT, false, Float.BYTES*8, Float.BYTES*3);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 2, GL_FLOAT, false, Float.BYTES*8, Float.BYTES*6);
+		glEnableVertexAttribArray(2);
+
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, false, Float.BYTES*8, 0);
 		glEnableVertexAttribArray(0);
 
         Shader lightingShader = new Shader("shaderVertex", "shaderFrag");
 		
-		Shader shaderLC = new Shader("shaderVertex", "shaderFragLC");
+		Shader shaderLC = new Shader("shaderVertex", "shaderFragTexture");
 
 		Texture diffuseMap = new Texture("CubeTexture.png");
-		diffuseMap.bind();
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 		Texture specularMap = new Texture("container2_specular.png");
-		specularMap.bind();
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		Texture lcTexture = new Texture("LCTexture.png");
+		
+		Texture stars = new Texture("Stars.png");
+
+		Light spotLight = Lights.createSpotLight(camera.position, camera.front, new Vector3f( 0.0f, 0.0f, 0.0f), new Vector3f(1.0f, 1.0f, 1.0f), new Vector3f(1.0f, 1.0f, 1.0f), 
+			1.0f, 0.09f, 0.032f, (float)Math.cos(Math.toRadians(12.5f)), (float)Math.cos(Math.toRadians(15.0f)));
+		
+		Lights.createDirLight(new Vector3f(-0.2f, -1.0f, -0.3f), new Vector3f(0.0f, 0.0f, 0.0f), new Vector3f(0.7f, 0.7f, 0.7f), new Vector3f(0.9f, 0.9f, 0.9f));
+
+		for (int i = 0; i < pointLightPositions.length; i++) {
+			Lights.createPointLight(pointLightPositions[i], new Vector3f(0.05f, 0.05f, 0.05f), 
+				new Vector3f(0.8f, 0.8f, 0.8f), new Vector3f(1.0f, 1.0f, 1.0f), 1.0f,0.3f,0.5f);
+		}
         while(!glfwWindowShouldClose(window))
 		{
 			float currentFrame = (float)glfwGetTime();
@@ -131,7 +135,7 @@ public class Renderer {
 
 			//render code
 
-			glClearColor(0.2f, 0.3f, 0.3f, 0f);
+			glClearColor(0.0f, 0.0f, 0.0f, 0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			lightingShader.use();
@@ -147,32 +151,16 @@ public class Renderer {
 			// be sure to activate shader when setting uniforms/drawing objects
 			lightingShader.use();		
 
-			lightingShader.setInt("DIR_LIGHT_COUNT", 1);
-			lightingShader.setInt("POINT_LIGHT_COUNT", pointLightPositions.length);
-			lightingShader.setInt("SOPT_LIGHT_COUNT", 1);
-
 			lightingShader.setInt("material.diffuse", 0);
 			lightingShader.setInt("material.specular", 1);
 			lightingShader.setFloat("material.shininess", 32.0f);
 
 			lightingShader.setUniform("objectColor", 0.5f, 0.5f, 0.31f);
 
-			Light dirLight = Lights.createDirLight(new Vector3f(-0.2f, -1.0f, -0.3f), new Vector3f(0.05f, 0.05f, 0.05f), new Vector3f(0.4f, 0.4f, 0.4f), new Vector3f(0.5f, 0.5f, 0.5f));
+			spotLight.setDirection(camera.front);
+			spotLight.setPosition(camera.position);
 
-			dirLight.setShaderValues(lightingShader);
-
-			Light spotLight = Lights.createSpotLight(camera.position, camera.front, new Vector3f( 0.0f, 0.0f, 0.0f), new Vector3f(1.0f, 1.0f, 1.0f), new Vector3f(1.0f, 1.0f, 1.0f), 
-				1.0f, 0.09f, 0.032f, (float)Math.cos(Math.toRadians(12.5f)), (float)Math.cos(Math.toRadians(15.0f)));
-
-			spotLight.setShaderValues(lightingShader);
-
-			for (int i = 0; i < pointLightPositions.length; i++) {
-				Light pointLight = Lights.createPointLight(pointLightPositions[i], new Vector3f(0.05f, 0.05f, 0.05f), 
-					new Vector3f(0.8f, 0.8f, 0.8f), new Vector3f(1.0f, 1.0f, 1.0f), 1.0f,0.3f,0.5f);
-				pointLight.setShaderValues(lightingShader);
-			}
-
-			Lights.resetIndices();
+			Lights.setLights(lightingShader);
 
 			glActiveTexture(GL_TEXTURE0);
 			diffuseMap.bind();
@@ -196,6 +184,8 @@ public class Renderer {
 			shaderLC.use();
 			shaderLC.setUniform("projection", projection);
 			shaderLC.setUniform("view", view);
+			glActiveTexture(GL_TEXTURE0);
+			lcTexture.bind();
 			glBindVertexArray(lightCubeVertexArray);
 			for (int i = 0; i < 4; i++)
 			{
@@ -206,6 +196,12 @@ public class Renderer {
 				glDrawArrays(GL_TRIANGLES, 0, 36);
 			}
 
+			glActiveTexture(GL_TEXTURE0);
+			stars.bind();
+
+			model = new CFrame(new Vector3f(0), (float)(Math.sin(glfwGetTime()/20.0)), (float)(Math.cos(glfwGetTime()/33.3)), lightCubeVertexArray, 1000).getAsMat4(); 
+			shaderLC.setUniform("model", model);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
 			
 
 			// check events and swap buffers

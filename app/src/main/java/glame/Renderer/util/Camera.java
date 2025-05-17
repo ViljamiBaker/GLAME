@@ -59,7 +59,7 @@ public class Camera {
         int[] height = new int[1];
         glfwGetWindowSize(window, width, height);
 		if(!ortho){
-			return new Matrix4f().perspective(fov, (float)width[0]/(float)height[0], 0.01f, 100.0f);
+			return new Matrix4f().perspective(fov, (float)width[0]/(float)height[0], 0.01f, 2000.0f);
 		}else{
 			return new Matrix4f().ortho(-1, 1, -1, 1,0.01f, 100.0f);
 		}

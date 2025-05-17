@@ -7,13 +7,23 @@ import org.joml.Vector3f;
 public class Lights {
     private Lights(){}
 
+    static final int MAX_LIGHTS = 128;
+
     static int dirLightIndex = 0;
     static int pointLightIndex = 0;
     static int spotLightIndex = 0;
 
     static ArrayList<Light> lights = new ArrayList<>();
 
+    static int dirLightCount = 0;
+    static int pointLightCount = 0;
+    static int spotLightCount = 0;
+
     public static void setLights(Shader shader){
+        shader.setInt("DIR_LIGHT_COUNT", dirLightCount);
+        shader.setInt("POINT_LIGHT_COUNT", pointLightCount);
+        shader.setInt("SPOT_LIGHT_COUNT", spotLightCount);
+        resetIndices();
         for (Light light : lights) {
             light.setShaderValues(shader);
         }
@@ -29,10 +39,11 @@ public class Lights {
         public Light(){
             Lights.lights.add(this);
         }
-        public void setShaderValues(Shader shader, int index){}
+        public void setShaderValues(Shader shader, int index) {}
         public void setShaderValues(Shader shader){}
         public void setPosition(Vector3f position) {}
         public void setDirection(Vector3f direction) {}
+        public void remove() {}
     }
 
     public static Light createDirLight(Vector3f direction, Vector3f ambient, Vector3f diffuse, Vector3f specular){
@@ -55,10 +66,15 @@ public class Lights {
         Vector3f diffuse;
         Vector3f specular;
         public DirLight(Vector3f direction, Vector3f ambient, Vector3f diffuse, Vector3f specular){
+            dirLightCount++;
             this.direction = direction;
             this.ambient = ambient;
             this.diffuse = diffuse;
             this.specular = specular;
+            if(dirLightCount>MAX_LIGHTS){
+                System.err.println("TOO MANY DIRLIGHTS: " + dirLightCount + " " + MAX_LIGHTS + ". REMOVING");
+                this.remove();
+            }
         }
 
         @Override
@@ -79,6 +95,12 @@ public class Lights {
             setShaderValues(shader, dirLightIndex);
             dirLightIndex++;
         }
+
+        @Override
+        public void remove(){
+            dirLightCount--;
+            lights.remove(this);
+        }
     }
 
     private static class PointLight extends Light{
@@ -92,6 +114,7 @@ public class Lights {
         Vector3f diffuse;
         Vector3f specular;
         public PointLight(Vector3f position, float constant, float linear, float quadratic, Vector3f ambient, Vector3f diffuse, Vector3f specular){
+            pointLightCount++;
             this.position = position;
             this.constant = constant;
             this.linear = linear;
@@ -99,6 +122,10 @@ public class Lights {
             this.ambient = ambient;
             this.diffuse = diffuse;
             this.specular = specular;
+            if(pointLightCount>MAX_LIGHTS){
+                System.err.println("TOO MANY POINTLIGHTS: " + pointLightCount + " " + MAX_LIGHTS + ". REMOVING");
+                this.remove();
+            }
         }
 
         @Override
@@ -122,6 +149,12 @@ public class Lights {
             setShaderValues(shader, pointLightIndex);
             pointLightIndex++;
         }
+
+        @Override
+        public void remove(){
+            pointLightCount--;
+            lights.remove(this);
+        }
     }
 
     private static class SpotLight extends Light{
@@ -139,6 +172,7 @@ public class Lights {
         Vector3f specular;
         public SpotLight(Vector3f position, Vector3f direction, float cutOff, float outerCutOff, float constant, 
                         float linear, float quadratic, Vector3f ambient, Vector3f diffuse, Vector3f specular){
+            spotLightCount++;
             this.position = position;
             this.direction = direction;
             this.cutOff = cutOff;
@@ -149,6 +183,10 @@ public class Lights {
             this.ambient = ambient;
             this.diffuse = diffuse;
             this.specular = specular;
+            if(spotLightCount>MAX_LIGHTS){
+                System.err.println("TOO MANY SPOTLIGHTS: " + spotLightCount + " " + MAX_LIGHTS + ". REMOVING");
+                this.remove();
+            }
         }
 
         @Override
@@ -179,6 +217,12 @@ public class Lights {
         public void setShaderValues(Shader shader){
             setShaderValues(shader, spotLightIndex);
             spotLightIndex++;
+        }
+
+        @Override
+        public void remove(){
+            spotLightCount--;
+            lights.remove(this);
         }
     }
 }

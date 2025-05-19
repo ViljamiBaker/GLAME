@@ -28,6 +28,7 @@ public class Enemy {
         if(velocity.length()>speed){
             velocity.normalize().mul(speed);
         }
+        velocity.mul(1.0f-0.02f*(float)dt);
         cFrame.position.add(velocity);
     }
 }

@@ -114,7 +114,7 @@ public class Renderer {
 		Texture stars = new Texture("Stars.png");
 
 		Light spotLight = Lights.createSpotLight(camera.position, camera.front, new Vector3f( 0.0f, 0.0f, 0.0f), new Vector3f(1.0f, 1.0f, 1.0f), new Vector3f(1.0f, 1.0f, 1.0f), 
-			1.0f, 0.09f, 0.032f, (float)Math.cos(Math.toRadians(12.5f)), (float)Math.cos(Math.toRadians(15.0f)));
+			1.0f, 0.045f, 0.0075f, (float)Math.cos(Math.toRadians(20.0f)), (float)Math.cos(Math.toRadians(30.0f)));
 		
 		Lights.createDirLight(new Vector3f(-0.2f, -1.0f, -0.3f), new Vector3f(0.0f, 0.0f, 0.0f), new Vector3f(0.7f, 0.7f, 0.7f), new Vector3f(0.9f, 0.9f, 0.9f));
 

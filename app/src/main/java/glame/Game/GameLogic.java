@@ -32,7 +32,7 @@ public class GameLogic {
         if(timeSinceLastSpawn > 1){
             timeSinceLastSpawn = 0;
             enemies.add(new Enemy(new CFrame(new Vector3f((float)r.nextDouble(-25, 25),(float)r.nextDouble(-25, 25),(float)r.nextDouble(-25, 25)),
-                    0,0,0,1), 10, r.nextFloat(0.5f, 2), player.cframe.position));
+                    0,0,0,1), 10, r.nextFloat(0.5f, 1), player.cframe.position));
         }
         timeSinceLastSpawn += dt;
         ArrayList<Bullet> bullesToRem = new ArrayList<>();

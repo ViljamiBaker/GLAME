@@ -50,13 +50,13 @@ public class Lights {
         return new DirLight(direction, ambient, diffuse, specular);
     }
 
-    public static Light createPointLight(Vector3f position, Vector3f ambient, Vector3f diffuse, Vector3f specular, float constant, float linear, float quadratic){
-        return new PointLight(position, constant, linear, quadratic, ambient, diffuse, specular);
+    public static Light createPointLight(Vector3f position, Vector3f diffuse, Vector3f specular, float constant, float linear, float quadratic){
+        return new PointLight(position, constant, linear, quadratic, diffuse, specular);
     }
 
-    public static Light createSpotLight(Vector3f position, Vector3f direction, Vector3f ambient, Vector3f diffuse, 
+    public static Light createSpotLight(Vector3f position, Vector3f direction, Vector3f diffuse, 
     Vector3f specular, float constant, float linear, float quadratic, float cutOff, float outerCutOff){
-        return new SpotLight(position, direction, cutOff, outerCutOff, constant, linear, quadratic, ambient, diffuse, specular);
+        return new SpotLight(position, direction, cutOff, outerCutOff, constant, linear, quadratic, diffuse, specular);
     }
 
     private static class DirLight extends Light{
@@ -109,17 +109,15 @@ public class Lights {
         float constant;
         float linear;
         float quadratic;
-        
-        Vector3f ambient;
+
         Vector3f diffuse;
         Vector3f specular;
-        public PointLight(Vector3f position, float constant, float linear, float quadratic, Vector3f ambient, Vector3f diffuse, Vector3f specular){
+        public PointLight(Vector3f position, float constant, float linear, float quadratic, Vector3f diffuse, Vector3f specular){
             pointLightCount++;
             this.position = position;
             this.constant = constant;
             this.linear = linear;
             this.quadratic = quadratic;
-            this.ambient = ambient;
             this.diffuse = diffuse;
             this.specular = specular;
             if(pointLightCount>MAX_LIGHTS){
@@ -136,7 +134,6 @@ public class Lights {
         @Override
         public void setShaderValues(Shader shader, int index){
             shader.setUniform("pointLights["+ index +"].position", position);
-            shader.setUniform("pointLights["+ index +"].ambient", ambient);
             shader.setUniform("pointLights["+ index +"].diffuse", diffuse);
             shader.setUniform("pointLights["+ index +"].specular", specular);
             shader.setFloat("pointLights["+ index +"].constant", constant);
@@ -167,11 +164,10 @@ public class Lights {
         float linear;
         float quadratic;
     
-        Vector3f ambient;
         Vector3f diffuse;
         Vector3f specular;
         public SpotLight(Vector3f position, Vector3f direction, float cutOff, float outerCutOff, float constant, 
-                        float linear, float quadratic, Vector3f ambient, Vector3f diffuse, Vector3f specular){
+                        float linear, float quadratic, Vector3f diffuse, Vector3f specular){
             spotLightCount++;
             this.position = position;
             this.direction = direction;
@@ -180,7 +176,6 @@ public class Lights {
             this.constant = constant;
             this.linear = linear;
             this.quadratic = quadratic;
-            this.ambient = ambient;
             this.diffuse = diffuse;
             this.specular = specular;
             if(spotLightCount>MAX_LIGHTS){
@@ -203,7 +198,6 @@ public class Lights {
         public void setShaderValues(Shader shader, int index){
             shader.setUniform("spotLights[" + index +"].position", position);
 			shader.setUniform("spotLights[" + index +"].direction", direction);
-			shader.setUniform("spotLights[" + index +"].ambient", ambient);
 			shader.setUniform("spotLights[" + index +"].diffuse", diffuse);
 			shader.setUniform("spotLights[" + index +"].specular", specular);
 			shader.setFloat("spotLights[" + index +"].constant", constant);

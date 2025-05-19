@@ -18,6 +18,7 @@ import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE1;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL15.GL_DYNAMIC_DRAW;
 import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static org.lwjgl.opengl.GL15.glBufferData;
@@ -26,6 +27,8 @@ import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
+
+import java.util.ArrayList;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -44,8 +47,8 @@ public class Renderer {
 	static float lastFrame = 0.0f; // Time of last frame
 	public static Camera camera;
 	public static long window;
+	ArrayList<Float> lineData = new ArrayList<>();
     public static void start(){
-
         init();
 
         window = createWindow(800, 600, "Colors");
@@ -113,13 +116,13 @@ public class Renderer {
 		
 		Texture stars = new Texture("Stars.png");
 
-		Light spotLight = Lights.createSpotLight(camera.position, camera.front, new Vector3f( 0.0f, 0.0f, 0.0f), new Vector3f(1.0f, 1.0f, 1.0f), new Vector3f(1.0f, 1.0f, 1.0f), 
+		Light spotLight = Lights.createSpotLight(camera.position, camera.front, new Vector3f(1.0f, 1.0f, 1.0f), new Vector3f(1.0f, 1.0f, 1.0f), 
 			1.0f, 0.045f, 0.0075f, (float)Math.cos(Math.toRadians(20.0f)), (float)Math.cos(Math.toRadians(30.0f)));
 		
 		Lights.createDirLight(new Vector3f(-0.2f, -1.0f, -0.3f), new Vector3f(0.0f, 0.0f, 0.0f), new Vector3f(0.7f, 0.7f, 0.7f), new Vector3f(0.9f, 0.9f, 0.9f));
 
 		for (int i = 0; i < pointLightPositions.length; i++) {
-			Lights.createPointLight(pointLightPositions[i], new Vector3f(0.05f, 0.05f, 0.05f), 
+			Lights.createPointLight(pointLightPositions[i], 
 				new Vector3f(0.8f, 0.8f, 0.8f), new Vector3f(1.0f, 1.0f, 1.0f), 1.0f,0.3f,0.5f);
 		}
         while(!glfwWindowShouldClose(window))
@@ -210,6 +213,49 @@ public class Renderer {
 		}
 		glfwTerminate();
     }
+
+	void draw_lines_flush()
+	{
+		int vao, vbo;
+
+		boolean created = false;
+		if (!created)
+		{
+			created = true;
+
+			vao = glGenVertexArrays();
+			glBindVertexArray(vao);
+
+			vbo = glGenBuffers();
+			glBindBuffer(GL_ARRAY_BUFFER, vbo);
+			glBufferData(GL_ARRAY_BUFFER,
+				lineData.stream().mapToDouble(Float::floatValue).toArray(), 
+					GL_DYNAMIC_DRAW);
+
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+								(void *)0);
+
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+								(void *)(3 * sizeof(float)));
+		}
+		else
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, vbo);
+			glBufferData(GL_ARRAY_BUFFER, lineData.size() * sizeof(float),
+						lineData.data(), GL_DYNAMIC_DRAW);
+		}
+
+		// 6 floats make up a vertex (3 position 3 color)
+		// divide by that to get number of vertices to draw
+		int count = lineData.size() / 6;
+
+		glBindVertexArray(vao);
+		glDrawArrays(GL_LINES, 0, count);
+
+		lineData.clear();
+	}
 
     public static void processInput(long window)
 	{

@@ -8,6 +8,7 @@ import static org.lwjgl.opengl.GL11.GL_FILL;
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL11.GL_FRONT_AND_BACK;
 import static org.lwjgl.opengl.GL11.GL_LINE;
+import static org.lwjgl.opengl.GL11.GL_LINES;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
@@ -29,8 +30,10 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import glame.game.GameLogic;
@@ -39,15 +42,17 @@ import glame.renderer.util.*;
 import glame.renderer.util.Lights.Light;
 //https://learnopengl.com/Lighting/Colors
 public class Renderer {
+	public static float deltaTime = 0.0f;	// Time between current frame and last frame
+	public static Camera camera;
+	public static long window;
+	
     static boolean wireframe = false;
 	static boolean pDownLast = false;
 	static boolean lockMouse = true;
 	static boolean lDownLast = false;
-	public static float deltaTime = 0.0f;	// Time between current frame and last frame
 	static float lastFrame = 0.0f; // Time of last frame
-	public static Camera camera;
-	public static long window;
-	ArrayList<Float> lineData = new ArrayList<>();
+	static ArrayList<Float> lineData = new ArrayList<>();
+
     public static void start(){
         init();
 
@@ -100,20 +105,13 @@ public class Renderer {
 		glVertexAttribPointer(2, 2, GL_FLOAT, false, Float.BYTES*8, Float.BYTES*6);
 		glEnableVertexAttribArray(2);
 
-
-		glVertexAttribPointer(0, 3, GL_FLOAT, false, Float.BYTES*8, 0);
-		glEnableVertexAttribArray(0);
-
         Shader lightingShader = new Shader("shaderVertex", "shaderFrag");
-		
 		Shader shaderLC = new Shader("shaderVertex", "shaderFragTexture");
+		Shader lineShader = new Shader("shaderLineVertex", "shaderLineFrag");
 
 		Texture diffuseMap = new Texture("CubeTexture.png");
-
 		Texture specularMap = new Texture("container2_specular.png");
-
 		Texture lcTexture = new Texture("LCTexture.png");
-		
 		Texture stars = new Texture("Stars.png");
 
 		Light spotLight = Lights.createSpotLight(camera.position, camera.front, new Vector3f(1.0f, 1.0f, 1.0f), new Vector3f(1.0f, 1.0f, 1.0f), 
@@ -138,7 +136,7 @@ public class Renderer {
 
 			//render code
 
-			glClearColor(0.0f, 0.0f, 0.0f, 0f);
+			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			lightingShader.use();
@@ -174,8 +172,6 @@ public class Renderer {
 			// world transformation
 			Matrix4f model = new Matrix4f();
 			for (int i = 0; i < cubePositions.length; i++) {
-
-				//cubePositions[i].rotation.rotateAxis(0.016f, new Vector3f(1.0f, 0.3f, 0.5f).normalize());
 				model = cubePositions[i].getAsMat4(); 
 				lightingShader.setUniform("model", model);
 				glBindVertexArray(cubeVertexArray);
@@ -204,8 +200,16 @@ public class Renderer {
 
 			model = new CFrame(new Vector3f(0), (float)(Math.sin(glfwGetTime()/20.0)), (float)(Math.cos(glfwGetTime()/33.3)), lightCubeVertexArray, 1000).getAsMat4(); 
 			shaderLC.setUniform("model", model);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
+			//glDrawArrays(GL_TRIANGLES, 0, 36);
 			
+			drawLine(new Vector3f(0.0f,0.0f,1.0f), new Vector3f(0.5f,0.5f,0.0f), new Vector3f(1.0f));
+			//drawLine(new Vector3f(0,0,0), new Vector3f(0,1,0), new Vector3f(0,1,0));
+			//drawLine(new Vector3f(0,0,0.1f), new Vector3f(0,0,1), new Vector3f(0,0,1));
+
+			lineShader.use();
+			lineShader.setUniform("projection", projection);
+			lineShader.setUniform("view", view);
+			drawLinesFlush();
 
 			// check events and swap buffers
 			glfwSwapBuffers(window);
@@ -214,44 +218,74 @@ public class Renderer {
 		glfwTerminate();
     }
 
-	void draw_lines_flush()
-	{
-		int vao, vbo;
+	static int lineVAO, lineVBO;
 
-		boolean created = false;
+	static void drawLine(Vector3f p1, Vector3f p2, Vector3f color)
+	{
+		// point 1
+		lineData.add(p1.x);
+		lineData.add(p1.y);
+		lineData.add(p1.z);
+
+		// color
+		lineData.add(color.x);
+		lineData.add(color.y);
+		lineData.add(color.z);
+
+		// point 2
+		lineData.add(p2.x);
+		lineData.add(p2.y);
+		lineData.add(p2.z);
+
+		// color
+		lineData.add(color.x);
+		lineData.add(color.y);
+		lineData.add(color.z);
+	}
+	static void drawLine2d(Vector2f p1, Vector2f p2, Vector3f color)
+	{
+		drawLine(new Vector3f(p1, 0), new Vector3f(p2, 0), color);
+	}
+
+	static boolean created = false;
+
+	static void drawLinesFlush()
+	{
+
+
+		double[] arr = lineData.stream().mapToDouble(f -> f != null ? f : Float.NaN).toArray();
+
 		if (!created)
 		{
 			created = true;
 
-			vao = glGenVertexArrays();
-			glBindVertexArray(vao);
+			lineVAO = glGenVertexArrays();
 
-			vbo = glGenBuffers();
-			glBindBuffer(GL_ARRAY_BUFFER, vbo);
-			glBufferData(GL_ARRAY_BUFFER,
-				lineData.stream().mapToDouble(Float::floatValue).toArray(), 
-					GL_DYNAMIC_DRAW);
+			lineVBO = glGenBuffers();
+			glBindBuffer(GL_ARRAY_BUFFER, lineVBO);
+			glBufferData(GL_ARRAY_BUFFER, arr, GL_STATIC_DRAW);
 
+			glBindVertexArray(lineVAO);
+
+			glVertexAttribPointer(0, 3, GL_FLOAT, false, Float.BYTES*6,0);
 			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
-								(void *)0);
 
+			glVertexAttribPointer(1, 3, GL_FLOAT, false, Float.BYTES*6,Float.BYTES*3);
 			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
-								(void *)(3 * sizeof(float)));
 		}
 		else
 		{
-			glBindBuffer(GL_ARRAY_BUFFER, vbo);
-			glBufferData(GL_ARRAY_BUFFER, lineData.size() * sizeof(float),
-						lineData.data(), GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, lineVBO);
+			glBufferData(GL_ARRAY_BUFFER, arr, GL_STATIC_DRAW);
 		}
+
+		System.out.println(Arrays.toString(arr));
 
 		// 6 floats make up a vertex (3 position 3 color)
 		// divide by that to get number of vertices to draw
-		int count = lineData.size() / 6;
+		int count = lineData.size()/6;
 
-		glBindVertexArray(vao);
+		glBindVertexArray(lineVAO);
 		glDrawArrays(GL_LINES, 0, count);
 
 		lineData.clear();

@@ -55,6 +55,10 @@ public class Renderer {
 	private static float lastFrame = 0.0f; // Time of last frame
 	private static ArrayList<Float> lineData = new ArrayList<>();
 
+	private static Shader lightingShader;
+	private static Shader pureShader;
+	private static Shader lineShader;
+
     public static void start(){
         init();
 
@@ -108,12 +112,9 @@ public class Renderer {
 		glVertexAttribPointer(2, 2, GL_FLOAT, false, Float.BYTES*8, Float.BYTES*6);
 		glEnableVertexAttribArray(2);
 
-        Shader lightingShader = new Shader("shaderVertex", "shaderFrag");
-		Shader pureShader = new Shader("shaderVertex", "shaderFragTexture");
-		Shader lineShader = new Shader("shaderLineVertex", "shaderLineFrag");
-
-		Texture diffuseMap = new Texture("CubeTexture.png");
-		Texture specularMap = new Texture("container2_specular.png");
+		lightingShader = new Shader("shaderVertex", "shaderFrag");
+		pureShader = new Shader("shaderVertex", "shaderFragTexture");
+		lineShader = new Shader("shaderLineVertex", "shaderLineFrag");
 		Texture lcTexture = new Texture("LCTexture.png");
 		Texture stars = new Texture("Stars.png");
 
@@ -176,16 +177,7 @@ public class Renderer {
 				glBindVertexArray(cubeVertexArray);
 				glDrawArrays(GL_TRIANGLES, 0, 36);
 			}*/
-			refreshModels();
-			for (Model model : modelBuffer) {
-				glActiveTexture(GL_TEXTURE0);
-				model.tex.bind();
-				glActiveTexture(GL_TEXTURE1);
-				model.spec.bind();
-				lightingShader.setUniform("model", model.transform);
-				glDrawArrays(GL_TRIANGLES, model.index, model.vertices.length/8);
-			}
-
+			drawModelBuffer();
 
 			pureShader.use();
 			pureShader.setUniform("projection", projection);
@@ -345,9 +337,11 @@ public class Renderer {
 
 	private static boolean createdModelVAO = false;
 
-	private static void refreshModels(){
+	private static void drawModelBuffer(){
+		modelBuffer.clear();
 		for (Renderable r : renderables) {
 			r.updateModel();
+			modelBuffer.add(r.getModel());
 		}
 		int length = 0;
 		for (Model m : modelBuffer) {
@@ -390,11 +384,19 @@ public class Renderer {
 		}
 		else
 		{
-			glBindBuffer(GL_ARRAY_BUFFER, lineVBO);
+			glBindBuffer(GL_ARRAY_BUFFER, modelVBO);
 			glBufferData(GL_ARRAY_BUFFER, largeVerticies, GL_STATIC_DRAW);
 		}
-
-
+		glBindVertexArray(modelVAO);
+		System.out.println(modelBuffer.size());
+		for (Model model : modelBuffer) {
+			glActiveTexture(GL_TEXTURE0);
+			model.tex.bind();
+			glActiveTexture(GL_TEXTURE1);
+			model.spec.bind();
+			lightingShader.setUniform("model", model.transform);
+			glDrawArrays(GL_TRIANGLES, model.index/8, model.vertices.length/8);
+		}
 	}
 
     public static void main(String[] args) {

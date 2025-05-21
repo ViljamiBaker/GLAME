@@ -1,13 +1,12 @@
 package glame.game;
 
-import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import glame.game.util.CFrame;
 import glame.game.util.GUTILVB;
-import glame.renderer.util.LUTILVB;
-import glame.renderer.util.Model;
-import glame.renderer.util.Renderable; 
+import glame.renderer.model.Model;
+import glame.renderer.model.Renderable;
+import glame.renderer.util.LUTILVB; 
 
 public class Enemy extends Renderable{
     Vector3f playerpos;
@@ -44,6 +43,6 @@ public class Enemy extends Renderable{
 
     @Override
     public void setModel(){
-        model = new Model(LUTILVB.cubeVertices, cFrame.getAsMat4(), LUTILVB.defaultTexture, LUTILVB.defaultSpecular);
+        model = new Model(LUTILVB.cubeVertices, LUTILVB.cubeIndicies, LUTILVB.defaultTexture, LUTILVB.defaultSpecular);
     }
 }

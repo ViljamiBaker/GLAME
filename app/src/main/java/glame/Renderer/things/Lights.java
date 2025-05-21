@@ -1,4 +1,4 @@
-package glame.renderer.util;
+package glame.renderer.things;
 
 import java.util.ArrayList;
 

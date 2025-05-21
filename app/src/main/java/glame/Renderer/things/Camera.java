@@ -1,4 +1,4 @@
-package glame.renderer.util;
+package glame.renderer.things;
 
 import static org.lwjgl.glfw.GLFW.*;
 

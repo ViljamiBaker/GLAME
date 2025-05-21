@@ -4,37 +4,40 @@ import org.joml.Vector3f;
 
 import glame.game.util.CFrame;
 import glame.game.util.GUTILVB;
-import glame.renderer.util.Lights;
-import glame.renderer.util.Lights.Light;
+import glame.renderer.model.Model;
+import glame.renderer.model.Renderable;
+import glame.renderer.util.LUTILVB;
 
-public class Bullet {
+public class Bullet extends Renderable{
     CFrame cFrame;
 
     Vector3f forward;
 
-    Light l;
-
     double speed;
-    //)new Vector3f(0, -dir.y, dir.z)
-    //(float)Math.PI/4.0f
-    //.rotateAxis(-dir.y, 0, 1, 0)
     public Bullet(Vector3f pos, Vector3f front, double speed){
-
         this.cFrame = new CFrame(pos.add(front, new Vector3f()), new Quaternionf().identity(), 0.2f);
         cFrame.setRotation(new Vector3f(GUTILVB.vector3toAngles(front)));
         cFrame.rotate(0, (float)Math.PI/4, 0);
         cFrame.rotate((float)Math.PI/4, 0, 0);
         this.forward = front;
         this.speed = speed;
-        //l = Lights.createPointLight(pos, new Vector3f(1,1,1), new Vector3f(1,1,1), new Vector3f(1,1,1), 1.0f,0.3f,0.5f);
     }
 
     public void update(double dt){
         cFrame.position.add(forward.mul((float)(dt*speed), new Vector3f()));
-        //l.setPosition(forward);
     }
 
     public CFrame getCFrame(){
         return new CFrame(cFrame.position, cFrame.rotation, cFrame.scale);
+    }
+
+    @Override
+    public void updateModel(){
+        model.transform = cFrame.getAsMat4();
+    }
+
+    @Override
+    public void setModel(){
+        model = new Model(LUTILVB.cubeVertices, LUTILVB.cubeIndicies, LUTILVB.defaultTexture, LUTILVB.defaultSpecular);
     }
 }

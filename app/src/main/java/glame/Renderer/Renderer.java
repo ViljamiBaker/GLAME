@@ -37,8 +37,14 @@ import org.joml.Vector3f;
 
 import glame.game.GameLogic;
 import glame.game.util.CFrame;
+import glame.renderer.model.Model;
+import glame.renderer.model.Renderable;
+import glame.renderer.model.Texture;
+import glame.renderer.things.Camera;
+import glame.renderer.things.Lights;
+import glame.renderer.things.Shader;
+import glame.renderer.things.Lights.Light;
 import glame.renderer.util.*;
-import glame.renderer.util.Lights.Light;
 //https://learnopengl.com/Lighting/Colors
 public class Renderer {
 	public static float deltaTime = 0.0f;	// Time between current frame and last frame
@@ -341,7 +347,7 @@ public class Renderer {
 		modelBuffer.clear();
 		for (Renderable r : renderables) {
 			r.updateModel();
-			modelBuffer.add(r.getModel());
+			modelBuffer.add(r.model());
 		}
 		int length = 0;
 		for (Model m : modelBuffer) {
@@ -388,7 +394,6 @@ public class Renderer {
 			glBufferData(GL_ARRAY_BUFFER, largeVerticies, GL_STATIC_DRAW);
 		}
 		glBindVertexArray(modelVAO);
-		System.out.println(modelBuffer.size());
 		for (Model model : modelBuffer) {
 			glActiveTexture(GL_TEXTURE0);
 			model.tex.bind();

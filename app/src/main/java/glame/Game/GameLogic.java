@@ -42,16 +42,19 @@ public class GameLogic {
             for (Bullet bullet : bullets) {
                 if(bullet.cFrame.position.sub(enemy.cFrame.position, new Vector3f()).length()<bullet.cFrame.scale+enemy.cFrame.scale){
                     enemy.health -= 1;
+                    bullet.remove();
                     bullesToRem.add(bullet);
                 }
             }
             if(enemy.health<=0){
+                enemy.remove();
                 enimiesToRem.add(enemy);
             }
         }
         for (Bullet bullet : bullets) {
             bullet.update(dt);
             if(bullet.cFrame.position.lengthSquared()>500){
+                bullet.remove();
                 bullesToRem.add(bullet);
             }
         }

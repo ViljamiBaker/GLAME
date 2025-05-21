@@ -14,7 +14,7 @@ import org.joml.Vector3f;
 
 import glame.game.util.CFrame;
 import glame.renderer.Renderer;
-import glame.renderer.util.Camera;
+import glame.renderer.things.Camera;
 
 public class Player {
     public CFrame cframe = new CFrame();

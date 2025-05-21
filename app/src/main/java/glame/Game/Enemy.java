@@ -1,13 +1,17 @@
 package glame.game;
 
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import glame.game.util.CFrame;
 import glame.game.util.GUTILVB;
+import glame.renderer.util.LUTILVB;
+import glame.renderer.util.Model;
+import glame.renderer.util.Renderable; 
 
-public class Enemy {
+public class Enemy extends Renderable{
     Vector3f playerpos;
-    Vector3f velocity = new Vector3f();;
+    Vector3f velocity = new Vector3f();
     CFrame cFrame;
     double health;
     float speed;
@@ -19,6 +23,7 @@ public class Enemy {
         this.speed = speed;
         this.playerpos = playerpos;
         accel = speed/30.0f;
+        setModel();
     }
 
     public void update(double dt){
@@ -30,5 +35,15 @@ public class Enemy {
         }
         velocity.mul(1.0f-0.02f*(float)dt);
         cFrame.position.add(velocity);
+    }
+
+    @Override
+    public void updateModel(){
+        model.transform = cFrame.getAsMat4();
+    }
+
+    @Override
+    public void setModel(){
+        model = new Model(LUTILVB.cubeVertices, cFrame.getAsMat4(), LUTILVB.defaultTexture, LUTILVB.defaultSpecular);
     }
 }

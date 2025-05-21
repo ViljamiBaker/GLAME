@@ -38,6 +38,8 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLDebugMessageCallback;
 
+import glame.renderer.Renderer;
+
 public class LUTILVB {
 
     public static void init(){
@@ -243,15 +245,22 @@ public class LUTILVB {
         glEnable(GL_DEBUG_OUTPUT);
         glDebugMessageCallback(GLDebugMessageCallback.create(
             (source, type, id, severity, length, message, userParam) -> {
-            System.err.println("OpenGL Debug Message:");
-            System.err.println("    Source: " + source);
-            System.err.println("    Type: " + type);
-            System.err.println("    ID: " + id);
-            System.err.println("    Severity: " + severity);
-            System.err.println("    Message: " + GLDebugMessageCallback.getMessage(length, message));
+                // ignore just notifications like: Buffer object 1 (bound to GL_ARRAY_BUFFER_ARB, usage hint is GL_STATIC_DRAW)
+                if (severity == 33387) {
+                    return;
+                }
+                System.err.println("OpenGL Debug Message:");
+                System.err.println("    Source: " + source);
+                System.err.println("    Type: " + type);
+                System.err.println("    ID: " + id);
+                System.err.println("    Severity: " + severity);
+                System.err.println("    Message: " + GLDebugMessageCallback.getMessage(length, message));
             }
         ),0);
     }
+
+    public static String defaultTexture = "CubeTexture.png";
+    public static String defaultSpecular = "container2_specular.png";
 
     public static float cubeVertices[] = {
         -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.25f, 0.0f,

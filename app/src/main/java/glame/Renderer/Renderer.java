@@ -19,7 +19,6 @@ import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE1;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
-import static org.lwjgl.opengl.GL15.GL_DYNAMIC_DRAW;
 import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static org.lwjgl.opengl.GL15.glBufferData;
@@ -30,7 +29,7 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -45,13 +44,16 @@ public class Renderer {
 	public static float deltaTime = 0.0f;	// Time between current frame and last frame
 	public static Camera camera;
 	public static long window;
+	public static ArrayList<Model> modelBuffer = new ArrayList<>();
+	public static ArrayList<Renderable> renderables = new ArrayList<>();
+	public static HashMap<String, Texture> textures = new HashMap<>();
 	
-    static boolean wireframe = false;
-	static boolean pDownLast = false;
-	static boolean lockMouse = true;
-	static boolean lDownLast = false;
-	static float lastFrame = 0.0f; // Time of last frame
-	static ArrayList<Float> lineData = new ArrayList<>();
+    private static boolean wireframe = false;
+	private static boolean pDownLast = false;
+	private static boolean lockMouse = true;
+	private static boolean lDownLast = false;
+	private static float lastFrame = 0.0f; // Time of last frame
+	private static ArrayList<Float> lineData = new ArrayList<>();
 
     public static void start(){
         init();
@@ -65,6 +67,7 @@ public class Renderer {
 		GameLogic.init();
 
 		camera = GameLogic.player.camera;
+		camera.enableCameraMovement();
 
 		float vertices[] = LUTILVB.cubeVertices;
 
@@ -106,7 +109,7 @@ public class Renderer {
 		glEnableVertexAttribArray(2);
 
         Shader lightingShader = new Shader("shaderVertex", "shaderFrag");
-		Shader shaderLC = new Shader("shaderVertex", "shaderFragTexture");
+		Shader pureShader = new Shader("shaderVertex", "shaderFragTexture");
 		Shader lineShader = new Shader("shaderLineVertex", "shaderLineFrag");
 
 		Texture diffuseMap = new Texture("CubeTexture.png");
@@ -123,6 +126,9 @@ public class Renderer {
 			Lights.createPointLight(pointLightPositions[i], 
 				new Vector3f(0.8f, 0.8f, 0.8f), new Vector3f(1.0f, 1.0f, 1.0f), 1.0f,0.3f,0.5f);
 		}
+		Camera staticCamera = new Camera(window);
+		staticCamera.position = new Vector3f(0,0,1);
+
         while(!glfwWindowShouldClose(window))
 		{
 			float currentFrame = (float)glfwGetTime();
@@ -140,10 +146,8 @@ public class Renderer {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			lightingShader.use();
-			if(!camera.projectionGood()){
-				projection = camera.getProjection();
-				lightingShader.setUniform("projection", projection);
-			}
+			projection = camera.getProjection();
+			lightingShader.setUniform("projection", projection);
 			
 			view = camera.getVeiw();
 
@@ -163,35 +167,39 @@ public class Renderer {
 
 			Lights.setLights(lightingShader);
 
-			glActiveTexture(GL_TEXTURE0);
-			diffuseMap.bind();
-			glActiveTexture(GL_TEXTURE1);
-			specularMap.bind();
 
-			CFrame[] cubePositions = GameLogic.getCubes();
-			// world transformation
-			Matrix4f model = new Matrix4f();
+
+			/*CFrame[] cubePositions = GameLogic.getCubes();
 			for (int i = 0; i < cubePositions.length; i++) {
 				model = cubePositions[i].getAsMat4(); 
 				lightingShader.setUniform("model", model);
 				glBindVertexArray(cubeVertexArray);
 				glDrawArrays(GL_TRIANGLES, 0, 36);
+			}*/
+			refreshModels();
+			for (Model model : modelBuffer) {
+				glActiveTexture(GL_TEXTURE0);
+				model.tex.bind();
+				glActiveTexture(GL_TEXTURE1);
+				model.spec.bind();
+				lightingShader.setUniform("model", model.transform);
+				glDrawArrays(GL_TRIANGLES, model.index, model.vertices.length/8);
 			}
 
 
-			// also draw the lamp object
-			shaderLC.use();
-			shaderLC.setUniform("projection", projection);
-			shaderLC.setUniform("view", view);
+			pureShader.use();
+			pureShader.setUniform("projection", projection);
+			pureShader.setUniform("view", view);
 			glActiveTexture(GL_TEXTURE0);
 			lcTexture.bind();
 			glBindVertexArray(lightCubeVertexArray);
+			Matrix4f model = new Matrix4f();
 			for (int i = 0; i < 4; i++)
 			{
 				model = new Matrix4f();
 				model = model.translate(pointLightPositions[i]);
 				model = model.scale(new Vector3f(0.2f)); // Make it a smaller cube
-				shaderLC.setUniform("model", model);
+				pureShader.setUniform("model", model);
 				glDrawArrays(GL_TRIANGLES, 0, 36);
 			}
 
@@ -199,17 +207,17 @@ public class Renderer {
 			stars.bind();
 
 			model = new CFrame(new Vector3f(0), (float)(Math.sin(glfwGetTime()/20.0)), (float)(Math.cos(glfwGetTime()/33.3)), lightCubeVertexArray, 1000).getAsMat4(); 
-			shaderLC.setUniform("model", model);
+			pureShader.setUniform("model", model);
 			//glDrawArrays(GL_TRIANGLES, 0, 36);
 			
-			drawLine(new Vector3f(0.0f,0.0f,1.0f), new Vector3f(0.5f,0.5f,0.0f), new Vector3f(1.0f));
+			//drawLine(new Vector3f(0.0f,0.0f,1.0f), new Vector3f(0.5f,0.5f,0.0f), new Vector3f(1.0f));
 			//drawLine(new Vector3f(0,0,0), new Vector3f(0,1,0), new Vector3f(0,1,0));
 			//drawLine(new Vector3f(0,0,0.1f), new Vector3f(0,0,1), new Vector3f(0,0,1));
-
-			lineShader.use();
-			lineShader.setUniform("projection", projection);
-			lineShader.setUniform("view", view);
-			drawLinesFlush();
+//
+			//lineShader.use();
+			//lineShader.setUniform("projection", staticCamera.getProjection());
+			//lineShader.setUniform("view", staticCamera.getVeiw());
+			//drawLinesFlush();
 
 			// check events and swap buffers
 			glfwSwapBuffers(window);
@@ -218,7 +226,14 @@ public class Renderer {
 		glfwTerminate();
     }
 
-	static int lineVAO, lineVBO;
+	public static Texture getTexture(String filepath){
+		if(textures.get(filepath)!=null){return textures.get(filepath);}
+		Texture tex = new Texture(filepath);
+		textures.put(filepath, tex);
+		return tex;
+	}
+
+	private static int lineVAO, lineVBO;
 
 	static void drawLine(Vector3f p1, Vector3f p2, Vector3f color)
 	{
@@ -247,17 +262,15 @@ public class Renderer {
 		drawLine(new Vector3f(p1, 0), new Vector3f(p2, 0), color);
 	}
 
-	static boolean created = false;
+	private static boolean createdLineVAO = false;
 
-	static void drawLinesFlush()
+	private static void drawLinesFlush()
 	{
-
-
 		double[] arr = lineData.stream().mapToDouble(f -> f != null ? f : Float.NaN).toArray();
 
-		if (!created)
+		if (!createdLineVAO)
 		{
-			created = true;
+			createdLineVAO = true;
 
 			lineVAO = glGenVertexArrays();
 
@@ -279,7 +292,7 @@ public class Renderer {
 			glBufferData(GL_ARRAY_BUFFER, arr, GL_STATIC_DRAW);
 		}
 
-		System.out.println(Arrays.toString(arr));
+		//System.out.println(Arrays.toString(arr));
 
 		// 6 floats make up a vertex (3 position 3 color)
 		// divide by that to get number of vertices to draw
@@ -316,6 +329,72 @@ public class Renderer {
 		}
 		lDownLast = glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS;
 		pDownLast = glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS;
+	}
+
+	public static void addRenderable(Renderable r){
+		renderables.add(r);
+		modelBuffer.add(r.model());
+	}
+
+	public static void removeRenderable(Renderable r){
+		renderables.remove(r);
+		modelBuffer.remove(r.model());
+	}
+
+	private static int modelVAO, modelVBO;
+
+	private static boolean createdModelVAO = false;
+
+	private static void refreshModels(){
+		for (Renderable r : renderables) {
+			r.updateModel();
+		}
+		int length = 0;
+		for (Model m : modelBuffer) {
+			length += m.vertices.length;
+		}
+		float[] largeVerticies = new float[length];
+
+		int offset = 0;
+
+		for (int m = 0; m < modelBuffer.size(); m++) {
+			Model model = modelBuffer.get(m);
+			model.index = offset;
+			for (int i = 0; i < model.vertices.length; i++) {
+				largeVerticies[offset] = model.vertices[i];
+				offset++;
+			}
+		}
+
+		if (!createdModelVAO)
+		{
+			createdModelVAO = true;
+
+			modelVAO = glGenVertexArrays();
+
+			modelVBO = glGenBuffers();
+			glBindBuffer(GL_ARRAY_BUFFER, modelVBO);
+			glBufferData(GL_ARRAY_BUFFER, largeVerticies, GL_STATIC_DRAW);
+
+			glBindVertexArray(modelVAO);
+
+			// pos
+			glVertexAttribPointer(0, 3, GL_FLOAT, false, Float.BYTES*8, 0);
+			glEnableVertexAttribArray(0);
+			// texCoord
+			glVertexAttribPointer(1, 3, GL_FLOAT, false, Float.BYTES*8, Float.BYTES*3);
+			glEnableVertexAttribArray(1);
+			// normal
+			glVertexAttribPointer(2, 2, GL_FLOAT, false, Float.BYTES*8, Float.BYTES*6);
+			glEnableVertexAttribArray(2);
+		}
+		else
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, lineVBO);
+			glBufferData(GL_ARRAY_BUFFER, largeVerticies, GL_STATIC_DRAW);
+		}
+
+
 	}
 
     public static void main(String[] args) {
